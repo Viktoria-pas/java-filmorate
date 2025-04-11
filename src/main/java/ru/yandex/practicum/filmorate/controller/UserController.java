@@ -1,0 +1,89 @@
+package ru.yandex.practicum.filmorate.controller;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.User;
+import jakarta.validation.Valid;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import java.util.Collection;
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    private final Logger log = LoggerFactory.getLogger(UserController.class);
+    private final UserService userService;
+
+    public UserController(UserStorage userStorage, UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public Collection<User> findAll() {
+        log.info("Запрос всех пользователей");
+        Collection<User> users = userService.findAll();
+        log.debug("Найдено {} пользователей", users.size());
+        return users;
+    }
+
+    @GetMapping("/{id}")
+    public User getById(@PathVariable Long id) {
+        log.info("Запрос пользователя с ID {}", id);
+        User user = userService.getById(id);
+        log.debug("Возвращаем пользователя: {}", user);
+        return user;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public User create(@RequestBody @Valid User user) {
+        log.info("Создание нового пользователя: {}", user);
+        User createdUser = userService.create(user);
+        log.info("Пользователь создан с ID {}", createdUser.getId());
+        log.debug("Полные данные созданного пользователя: {}", createdUser);
+        return createdUser;
+    }
+
+    @PutMapping
+    public User update(@RequestBody @Valid User user) {
+        log.info("Обновление пользователя с ID {}", user.getId());
+        User updatedUser = userService.update(user);
+        log.info("Пользователь с ID {} успешно обновлен", user.getId());
+        log.debug("Обновленные данные пользователя: {}", updatedUser);
+        return updatedUser;
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("Пользователь {} добавляет в друзья пользователя {}", id, friendId);
+        userService.addFriends(id, friendId);
+        log.info("Пользователи {} и {} теперь друзья", id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("Пользователь {} удаляет из друзей пользователя {}", id, friendId);
+        userService.deleteFriend(id, friendId);
+        log.info("Пользователи {} и {} больше не друзья", id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        log.info("Запрос списка друзей пользователя {}", id);
+        List<User> friends = userService.getAllFriends(id);
+        log.debug("Найдено {} друзей пользователя {}", friends.size(), id);
+        return friends;
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        log.info("Запрос общих друзей пользователей {} и {}", id, otherId);
+        List<User> commonFriends = userService.getCommonFriends(id, otherId);
+        log.debug("Найдено {} общих друзей", commonFriends.size());
+        return commonFriends;
+    }
+}
+
