@@ -1,79 +1,110 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.ConstraintViolation;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
+import java.util.Set;
 
-@SpringBootTest
-class FilmControllerTest {
+import static org.junit.jupiter.api.Assertions.*;
 
-    @Autowired
-    private FilmController filmController;
-    private final Film film = new Film();
+class FilmValidationTest {
+
+    private static Validator validator;
+
+    @BeforeAll
+    static void setUpValidator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
 
     @Test
     void shouldRejectEmptyName() {
-        film.setId(1L);
-        film.setName(null);
+        Film film = new Film();
+        film.setName("");
         film.setDescription("description");
-        assertThrows(ConditionsNotMetException.class, () -> filmController.create(film));
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(100);
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")));
     }
 
     @Test
     void shouldRejectLongDescription() {
-        String longDesc = "a".repeat(201);
-        film.setDescription(longDesc);
-        assertThrows(ConditionsNotMetException.class, () -> filmController.create(film));
+        Film film = new Film();
+        film.setName("Test");
+        film.setDescription("a".repeat(201));
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(100);
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("description")));
     }
 
     @Test
     void shouldAcceptMaxLengthDescription() {
-        String maxDesc = "a".repeat(200);
-        film.setName("Film");
-        film.setReleaseDate(LocalDate.of(1895, 12, 28));
-        film.setDuration(10);
-        film.setDescription(maxDesc);
-        assertDoesNotThrow(() -> filmController.create(film));
+        Film film = new Film();
+        film.setName("Test");
+        film.setDescription("a".repeat(200));
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(100);
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.isEmpty());
     }
 
     @Test
     void shouldRejectEarlyReleaseDate() {
+        Film film = new Film();
+        film.setName("Test");
+        film.setDescription("description");
         film.setReleaseDate(LocalDate.of(1895, 12, 27));
-        assertThrows(ConditionsNotMetException.class, () -> filmController.create(film));
+        film.setDuration(100);
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("releaseDate")));
     }
 
     @Test
     void shouldAcceptCinemaBirthday() {
-        film.setName("Film");
+        Film film = new Film();
+        film.setName("Test");
+        film.setDescription("description");
         film.setReleaseDate(LocalDate.of(1895, 12, 28));
-        film.setDuration(10);
-        assertDoesNotThrow(() -> filmController.create(film));
+        film.setDuration(100);
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.isEmpty());
     }
 
     @Test
     void shouldRejectZeroDuration() {
-        film.setDuration(10);
-        assertThrows(ConditionsNotMetException.class, () -> filmController.create(film));
+        Film film = new Film();
+        film.setName("Test");
+        film.setDescription("description");
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(0);
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("duration")));
     }
 
     @Test
     void shouldAcceptValidFilm() {
-        film.setId(1L);
+        Film film = new Film();
         film.setName("Hobbit");
-        film.setDuration(10);
-        film.setDescription("The best Film");
+        film.setDescription("The best film");
         film.setReleaseDate(LocalDate.of(2012, 11, 11));
-        assertDoesNotThrow(() -> filmController.create(film));
+        film.setDuration(150);
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.isEmpty());
     }
-
-
-
-
 }

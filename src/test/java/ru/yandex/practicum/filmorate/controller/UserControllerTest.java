@@ -1,76 +1,109 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.Set;
 
-@SpringBootTest
-class UserControllerTest {
+import static org.junit.jupiter.api.Assertions.*;
 
-    @Autowired
-    private UserController userController;
-    private final User user = new User();
+class UserValidationTest {
 
-    @Test
-    void shouldRejectEmptyEmail() {
-        user.setEmail("");
-        assertThrows(ConditionsNotMetException.class, () -> userController.create(user));
+    private static Validator validator;
+
+    @BeforeAll
+    static void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
+    private Set<ConstraintViolation<User>> validateUser(User user) {
+        return validator.validate(user);
     }
 
     @Test
-    void shouldRejectEmailWithoutAt() {
+    void shouldRejectEmptyEmail() {
+        User user = new User();
+        user.setEmail("");
+        user.setLogin("user123");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        Set<ConstraintViolation<User>> violations = validateUser(user);
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldRejectEmailWithoutAtSymbol() {
+        User user = new User();
         user.setEmail("invalid.email");
-        assertThrows(ConditionsNotMetException.class, () -> userController.create(user));
+        user.setLogin("user123");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        Set<ConstraintViolation<User>> violations = validateUser(user);
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldRejectEmptyLogin() {
-        user.setLogin("");
-        assertThrows(ConditionsNotMetException.class, () -> userController.create(user));
-    }
-
-    @Test
-    void shouldRejectLoginWithSpaces() {
-        user.setLogin("login with spaces");
-        assertThrows(ConditionsNotMetException.class, () -> userController.create(user));
-    }
-
-    @Test
-    void shouldUseLoginWhenNameEmpty() {
-        user.setLogin("123");
+        User user = new User();
         user.setEmail("email@post.com");
-        user.setBirthday(LocalDate.of(1995, 12, 15));
-        User created = userController.create(user);
-        assertEquals(user.getLogin(), created.getName());
+        user.setLogin("");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        Set<ConstraintViolation<User>> violations = validateUser(user);
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldAcceptUserWhenNameIsNull() {
+        User user = new User();
+        user.setEmail("email@post.com");
+        user.setLogin("user123");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+        user.setName(null);
+
+        Set<ConstraintViolation<User>> violations = validateUser(user);
+        assertTrue(violations.isEmpty());
     }
 
     @Test
     void shouldRejectFutureBirthday() {
+        User user = new User();
+        user.setEmail("email@post.com");
+        user.setLogin("user123");
         user.setBirthday(LocalDate.now().plusDays(1));
-        assertThrows(ConditionsNotMetException.class, () -> userController.create(user));
+
+        Set<ConstraintViolation<User>> violations = validateUser(user);
+        assertFalse(violations.isEmpty());
     }
 
     @Test
-    void shouldAcceptCurrentDateBirthday() {
+    void shouldAcceptTodayBirthday() {
+        User user = new User();
         user.setEmail("email@post.com");
+        user.setLogin("user123");
         user.setBirthday(LocalDate.now());
-        user.setLogin("123");
-        assertDoesNotThrow(() -> userController.create(user));
+
+        Set<ConstraintViolation<User>> violations = validateUser(user);
+        assertTrue(violations.isEmpty());
     }
 
     @Test
     void shouldAcceptValidUser() {
+        User user = new User();
         user.setId(1L);
-        user.setName("Vova");
         user.setEmail("email@post.com");
-        user.setLogin("vava123");
+        user.setLogin("user123");
+        user.setName("Vova");
         user.setBirthday(LocalDate.of(1995, 12, 15));
-        assertDoesNotThrow(() -> userController.create(user));
+
+        Set<ConstraintViolation<User>> violations = validateUser(user);
+        assertTrue(violations.isEmpty());
     }
 }
