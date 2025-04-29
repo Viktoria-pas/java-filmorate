@@ -23,7 +23,6 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-
     @GetMapping
     public Collection<Film> findAll() {
         log.info("Запрос всех фильмов");
@@ -36,10 +35,6 @@ public class FilmController {
     public Film getById(@PathVariable Long id) {
         log.info("Запрос фильма с ID {}", id);
         Film film = filmService.getById(id);
-        if (film == null) {
-            log.warn("Фильм с ID {} не найден", id);
-            throw new NotFoundException("Фильм не найден");
-        }
         log.debug("Возвращаем фильм: {}", film);
         return film;
     }
