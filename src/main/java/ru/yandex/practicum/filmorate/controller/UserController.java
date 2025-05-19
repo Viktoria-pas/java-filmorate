@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FriendshipService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -73,11 +72,11 @@ public class UserController {
         return friendshipService.getFriendRequests(id);
     }
 
-    @DeleteMapping("/{id}/friends/{friend_Id}")
-    public void removeFriend(@PathVariable Long id, @PathVariable Long friend_Id) {
-        log.info("Пользователь {} удаляет из друзей пользователя {}", id, friend_Id);
-        friendshipService.removeFriend(id, friend_Id);
-        log.info("Пользователи {} и {} больше не друзья", id, friend_Id);
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("Пользователь {} удаляет из друзей пользователя {}", id, friendId);
+        friendshipService.removeFriend(id, friendId);
+        log.info("Пользователи {} и {} больше не друзья", id, friendId);
     }
 
     @GetMapping("/{id}/friends")
