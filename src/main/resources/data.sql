@@ -1,3 +1,27 @@
+-- Отключаем проверку внешних ключей
+SET REFERENTIAL_INTEGRITY FALSE;
+
+-- Очистка зависимых таблиц
+DELETE FROM likes;
+DELETE FROM friendships;
+DELETE FROM film_genres;
+DELETE FROM films;
+DELETE FROM users;
+
+-- Очистка таблиц friend_status, genres и mpa_ratings
+DELETE FROM friend_status;
+DELETE FROM genres;
+DELETE FROM mpa_ratings;
+
+-- Сброс счетчиков автоинкремента (если используется H2)
+ALTER TABLE friend_status ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE genres ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE mpa_ratings ALTER COLUMN id RESTART WITH 1;
+
+-- Включаем проверку внешних ключей
+SET REFERENTIAL_INTEGRITY TRUE;
+
+
 INSERT INTO mpa_ratings (id, name, description) VALUES
 (1, 'G', 'Нет возрастных ограничений'),
 (2, 'PG', 'Детям рекомендуется смотреть фильм с родителями'),
