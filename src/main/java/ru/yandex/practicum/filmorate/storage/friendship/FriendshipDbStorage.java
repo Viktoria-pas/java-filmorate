@@ -17,6 +17,7 @@ public class FriendshipDbStorage implements FriendshipStorage {
         this.jdbcTemplate = jdbcTemplate;
         this.friendshipRowMapper = friendshipRowMapper;
     }
+
     private static final String CHECK_REQUEST_QUERY =
             "SELECT status_id FROM friendships WHERE user_id = ? AND friend_id = ?";
     private static final String UPDATE_STATUS_QUERY =
@@ -58,8 +59,8 @@ public class FriendshipDbStorage implements FriendshipStorage {
 
     @Override
     public List<Friendship> findFriendshipsByUserId(Long userId) {
-        return jdbcTemplate.query(FIEND_FRIENDS_QUERY
-                , friendshipRowMapper, userId);
+        return jdbcTemplate.query(FIEND_FRIENDS_QUERY,
+                 friendshipRowMapper, userId);
     }
 
     @Override
