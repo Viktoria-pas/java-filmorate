@@ -5,6 +5,7 @@ INSERT INTO mpa_ratings (id, name, description) VALUES
 (4, 'R', 'Лицам до 17 лет просмотр только в присутствии взрослого'),
 (5, 'NC-17', 'Лицам до 18 лет просмотр запрещён');
 
+
 INSERT INTO genres (id, name) VALUES
 (1, 'Комедия'),
 (2, 'Драма'),
