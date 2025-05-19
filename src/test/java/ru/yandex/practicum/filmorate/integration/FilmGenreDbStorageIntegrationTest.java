@@ -95,7 +95,6 @@ public class FilmGenreDbStorageIntegrationTest {
         testUser = userDbStorage.save(testUser);
     }
 
-
     @Test
     public void testSaveAndFindFilmGenres() {
 

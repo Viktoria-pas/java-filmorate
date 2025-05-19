@@ -118,6 +118,7 @@ public class FilmDbStorageIntegrationTest {
         assertThat(updatedFilm.getName()).isEqualTo("Обновленное название");
         assertThat(updatedFilm.getGenres()).extracting("id").contains(savedGenre2.getId());
     }
+
     @Test
     public void testDeleteFilm() {
 
