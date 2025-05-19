@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-@Qualifier("likeDbStorage")
 public class LikeDbStorage implements LikeStorage {
 
     private final JdbcTemplate jdbcTemplate;

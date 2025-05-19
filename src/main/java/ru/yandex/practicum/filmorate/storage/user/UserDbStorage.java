@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-@Qualifier("userDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserRowMapper userRowMapper;

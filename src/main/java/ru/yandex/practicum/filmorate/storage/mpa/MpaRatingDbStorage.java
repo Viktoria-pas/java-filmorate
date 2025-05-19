@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Component
-@Qualifier("mpaRatingDbStorage")
 public class MpaRatingDbStorage implements MpaRatingStorage {
 
     private final JdbcTemplate jdbcTemplate;
