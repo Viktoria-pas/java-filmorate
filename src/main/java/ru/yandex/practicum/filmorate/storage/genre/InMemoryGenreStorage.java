@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.*;
 
 @Component
-public class InMemoryGenreStorage implements GenreStorage{
+public class InMemoryGenreStorage implements GenreStorage {
     private final Map<Integer, Genre> genres = new HashMap<>();
 
     @Override

@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Component
 public class InMemoryMpaRatingStorage implements MpaRatingStorage {
+
     private final Map<Integer, MpaRating> ratings = new HashMap<>();
     private int nextId = 1;
 

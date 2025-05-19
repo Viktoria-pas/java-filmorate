@@ -11,6 +11,7 @@ import java.util.Optional;
 @Component
 @Qualifier("mpaRatingDbStorage")
 public class MpaRatingDbStorage implements MpaRatingStorage {
+
     private final JdbcTemplate jdbcTemplate;
     private final MpaRatingRowMapper mpaRatingRowMapper;
     private static final String FIND_ALL_QUERY = "SELECT * FROM mpa_ratings";
