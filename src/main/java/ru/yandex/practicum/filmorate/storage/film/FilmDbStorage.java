@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-@Qualifier("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FilmRowMapper filmRowMapper;
@@ -39,6 +37,7 @@ public class FilmDbStorage implements FilmStorage {
             FROM films f
             JOIN mpa_ratings m ON f.rating_id = m.id
             WHERE f.id = ?
+            ORDER BY id ASC
             """;
     private static final String SAVE_QUERY = ("INSERT INTO films (name, description, release_date, duration, rating_id) VALUES (?, ?, ?, ?, ?)");
     private static final String UPDATE_QUERY = ("UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, rating_id = ?  WHERE id = ?");

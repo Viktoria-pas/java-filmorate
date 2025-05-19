@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 
 @Service
-@Qualifier("filmService")
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;

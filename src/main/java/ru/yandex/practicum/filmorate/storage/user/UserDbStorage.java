@@ -24,7 +24,7 @@ public class UserDbStorage implements UserStorage {
         this.userRowMapper = new UserRowMapper(jdbcTemplate);
     }
 
-    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
+    private static final String FIND_ALL_QUERY = "SELECT * FROM users ORDER BY id ASC";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
     private static final String SAVE_QUERY = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
