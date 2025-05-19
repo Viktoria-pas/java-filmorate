@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.integration;
 
-
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,22 +53,9 @@ public class FilmDbStorageIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        Optional<MpaRating> mpaOptional = mpaRatingDbStorage.findById(1);
-        testMpaRating = mpaRatingDbStorage.findById(1)
-                .orElseGet(() -> {
-                    MpaRating newMpa = new MpaRating();
-                    newMpa.setId(1);
-                    newMpa.setName("G");
-                    newMpa.setDescription("General audiences");
-                    return mpaRatingDbStorage.save(newMpa);
-                });
+        testMpaRating = mpaRatingDbStorage.findById(1).orElseThrow(() -> new IllegalStateException("MPA not found"));
+        testGenre = genreDbStorage.findById(1).orElseThrow(() -> new IllegalStateException("Genre not found"));
 
-        testGenre = genreDbStorage.findById(1)
-                .orElseGet(() -> {
-                    Genre newGenre = new Genre();
-                    newGenre.setName("Комедия");
-                    return genreDbStorage.save(newGenre);
-                });
         testFilm = new Film();
         testFilm.setName("Integration Test Film");
         testFilm.setDescription("Тестовое описание");
@@ -105,18 +91,17 @@ public class FilmDbStorageIntegrationTest {
 
     @Test
     public void testUpdateFilm() {
-
         testFilm.setName("Обновленное название");
-        Genre genre2 = new Genre();
-        genre2.setName("Триллер");
-        Genre savedGenre2 = genreDbStorage.save(genre2);
 
-        testFilm.setGenres(Set.of(savedGenre2));
+        Genre genre2 = genreDbStorage.findById(4)
+                .orElseThrow(() -> new IllegalStateException("Genre 'Триллер' not found"));
+
+        testFilm.setGenres(Set.of(genre2));
 
         Film updatedFilm = filmDbStorage.update(testFilm);
 
         assertThat(updatedFilm.getName()).isEqualTo("Обновленное название");
-        assertThat(updatedFilm.getGenres()).extracting("id").contains(savedGenre2.getId());
+        assertThat(updatedFilm.getGenres()).extracting("id").contains(genre2.getId());
     }
 
     @Test

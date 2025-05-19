@@ -19,7 +19,6 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaRatingRowMapper;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserRowMapper;
 
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -42,39 +41,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmGenreDbStorageIntegrationTest {
+
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final FilmDbStorage filmDbStorage;
     private final GenreDbStorage genreDbStorage;
     private final MpaRatingDbStorage mpaRatingDbStorage;
     private final UserDbStorage userDbStorage;
+
     private Film testFilm;
-    private User testUser;
-    private Genre testGenre;
+    private Genre testGenre1;
     private Genre testGenre2;
     private MpaRating testMpaRating;
+    private User testUser;
 
     @BeforeEach
     public void setUp() {
         testMpaRating = mpaRatingDbStorage.findById(1)
                 .orElseGet(() -> {
-                    MpaRating newMpa = new MpaRating();
-                    newMpa.setName("G");
-                    newMpa.setDescription("General audiences");
-                    return mpaRatingDbStorage.save(newMpa);
+                    MpaRating mpa = new MpaRating();
+                    mpa.setName("G");
+                    mpa.setDescription("General audiences");
+                    return mpaRatingDbStorage.save(mpa);
                 });
 
-        testGenre = genreDbStorage.findById(1)
+        testGenre1 = genreDbStorage.findById(1)
                 .orElseGet(() -> {
-                    Genre newGenre = new Genre();
-                    newGenre.setName("Комедия");
-                    return genreDbStorage.save(newGenre);
+                    Genre g = new Genre();
+                    g.setName("Комедия");
+                    return genreDbStorage.save(g);
                 });
 
         testGenre2 = genreDbStorage.findById(2)
                 .orElseGet(() -> {
-                    Genre newGenre = new Genre();
-                    newGenre.setName("Драма");
-                    return genreDbStorage.save(newGenre);
+                    Genre g = new Genre();
+                    g.setName("Драма");
+                    return genreDbStorage.save(g);
                 });
 
         testFilm = new Film();
@@ -83,7 +84,7 @@ public class FilmGenreDbStorageIntegrationTest {
         testFilm.setReleaseDate(LocalDate.of(2020, 1, 1));
         testFilm.setDuration(100);
         testFilm.setMpa(testMpaRating);
-        testFilm.setGenres(Set.of(testGenre, testGenre2));
+        testFilm.setGenres(Set.of(testGenre1, testGenre2));
         testFilm = filmDbStorage.save(testFilm);
 
         testUser = new User();
@@ -96,8 +97,8 @@ public class FilmGenreDbStorageIntegrationTest {
 
     @Test
     public void testSaveAndFindFilmGenres() {
+        filmGenreDbStorage.saveFilmGenres(testFilm.getId(), List.of(testGenre1.getId(), testGenre2.getId()));
 
-        filmGenreDbStorage.saveFilmGenres(testFilm.getId(), List.of(testGenre.getId(), testGenre2.getId()));
         List<FilmGenre> genres = filmGenreDbStorage.findByFilmId(testFilm.getId());
         assertThat(genres).isNotNull();
         assertThat(genres.size()).isGreaterThanOrEqualTo(2);
@@ -105,10 +106,13 @@ public class FilmGenreDbStorageIntegrationTest {
 
     @Test
     public void testDeleteFilmGenres() {
-        filmGenreDbStorage.saveFilmGenres(testFilm.getId(), List.of(testGenre.getId(), testGenre2.getId()));
+        filmGenreDbStorage.saveFilmGenres(testFilm.getId(), List.of(testGenre1.getId(), testGenre2.getId()));
+
         filmGenreDbStorage.deleteFilmGenres(testFilm.getId());
+
         List<FilmGenre> genres = filmGenreDbStorage.findByFilmId(testFilm.getId());
         assertThat(genres).isEmpty();
     }
 }
+
 
