@@ -2,18 +2,28 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
     @Override
-    public Film create(Film film) {
-        film.setId(getNextId());
+    public Film save(Film film) {
+        if (film.getId() == null) {
+            film.setId(getNextId());
+        }
+
+        if (film.getGenres() == null) {
+            film.setGenres(new HashSet<>());
+        }
+        if (film.getMpa() == null) {
+            film.setMpa(new MpaRating());
+        }
+
         films.put(film.getId(), film);
         return film;
     }
@@ -25,8 +35,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getById(Long id) {
-        return films.get(id);
+    public Optional<Film> findById(Long id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
@@ -35,8 +45,28 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         films.remove(id);
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        Film film = films.get(filmId);
+        film.getLikes().add(userId);
+    }
+
+    @Override
+    public void removeLike(Long filmId, Long userId) {
+        Film film = films.get(filmId);
+        film.getLikes().remove(userId);
+    }
+
+    @Override
+    public List<Film> getPopularFilms(int count) {
+        return films.values().stream()
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private long getNextId() {
