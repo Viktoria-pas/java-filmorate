@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +17,7 @@ public class FilmController {
     private final Logger log = LoggerFactory.getLogger(FilmController.class);
     private final FilmService filmService;
 
-    public FilmController(FilmService filmService, FilmStorage filmStorage) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }
 
@@ -33,7 +32,7 @@ public class FilmController {
     @GetMapping("/{id}")
     public Film getById(@PathVariable Long id) {
         log.info("Запрос фильма с ID {}", id);
-        Film film = filmService.getById(id);
+        Film film = filmService.findById(id);
         log.debug("Возвращаем фильм: {}", film);
         return film;
     }
@@ -42,7 +41,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.CREATED)
     public Film create(@RequestBody @Valid Film film) {
         log.info("Создание нового фильма: {}", film);
-        Film createdFilm = filmService.create(film);
+        Film createdFilm = filmService.save(film);
         log.info("Фильм создан с ID {}", createdFilm.getId());
         log.debug("Полные данные созданного фильма: {}", createdFilm);
         return createdFilm;
@@ -61,16 +60,12 @@ public class FilmController {
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Пользователь {} ставит лайк фильму {}", userId, id);
         filmService.addLike(id, userId);
-        log.info("Лайк добавлен. Фильм {} теперь имеет {} лайков",
-                id, filmService.getById(id).getLikes().size());
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Пользователь {} удаляет лайк у фильма {}", userId, id);
         filmService.deleteLike(id, userId);
-        log.info("Лайк удален. Фильм {} теперь имеет {} лайков",
-                id, filmService.getById(id).getLikes().size());
     }
 
     @GetMapping("/popular")
